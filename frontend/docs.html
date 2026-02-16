@@ -265,10 +265,24 @@
                 </div>
                 
                 <div class="sidebar-section">
+                    <div class="sidebar-title">Smart Contract</div>
+                    <a href="#contract-address" class="sidebar-link">Contract Address</a>
+                    <a href="#contract-abi" class="sidebar-link">Contract ABI</a>
+                    <a href="#sdk" class="sidebar-link">SDKs</a>
+                </div>
+                
+                <div class="sidebar-section">
                     <div class="sidebar-title">API Reference</div>
                     <a href="#api-overview" class="sidebar-link">Overview</a>
                     <a href="#endpoints" class="sidebar-link">Endpoints</a>
                     <a href="#errors" class="sidebar-link">Error Codes</a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Resources</div>
+                    <a href="#tutorials" class="sidebar-link">Video Tutorials</a>
+                    <a href="#github" class="sidebar-link">GitHub</a>
+                    <a href="#community" class="sidebar-link">Community</a>
                 </div>
             </aside>
 
@@ -538,6 +552,229 @@ Block Explorer: https://basescan.org</code>
                         <td>Server Error — Something went wrong on our end</td>
                     </tr>
                 </table>
+
+                <h2 id="contract-address">Smart Contract</h2>
+                
+                <h3>Contract Addresses</h3>
+                
+                <table>
+                    <tr>
+                        <th>Contract</th>
+                        <th>Address</th>
+                        <th>Network</th>
+                    </tr>
+                    <tr>
+                        <td>$CLAW Token</td>
+                        <td><code>0x869f37b5ed9244e4bc952eead011e04e7860e844</code></td>
+                        <td>Base Mainnet</td>
+                    </tr>
+                    <tr>
+                        <td>ClawMart Payment</td>
+                        <td><code>Coming Soon</code></td>
+                        <td>Base Mainnet</td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>Base Network Info:</strong><br>
+                    RPC: https://mainnet.base.org<br>
+                    Chain ID: 8453<br>
+                    Explorer: https://basescan.org
+                </div>
+
+                <h2 id="contract-abi">Contract ABI</h2>
+                
+                <h3>ClawMartPayment Contract</h3>
+                
+                <div class="code-block">
+<code>[{
+  "inputs": [{"internalType": "address", "name": "_platformWallet", "type": "address"}],
+  "stateMutability": "nonpayable",
+  "type": "constructor"
+},
+{
+  "inputs": [
+    {"internalType": "bytes32", "name": "_orderId", "type": "bytes32"},
+    {"internalType": "address", "name": "_seller", "type": "address"},
+    {"internalType": "uint256", "name": "_amount", "type": "uint256"}
+  ],
+  "name": "createOrder",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [{"internalType": "bytes32", "name": "_orderId", "type": "bytes32"}],
+  "name": "payOrder",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [{"internalType": "bytes32", "name": "_orderId", "type": "bytes32"}],
+  "name": "confirmDelivery",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [{"internalType": "bytes32", "name": "", "type": "bytes32"}],
+  "name": "orders",
+  "outputs": [
+    {"internalType": "address", "name": "buyer", "type": "address"},
+    {"internalType": "address", "name": "seller", "type": "address"},
+    {"internalType": "uint256", "name": "amount", "type": "uint256"},
+    {"internalType": "uint256", "name": "fee", "type": "uint256"},
+    {"internalType": "bool", "name": "isPaid", "type": "bool"},
+    {"internalType": "bool", "name": "isDelivered", "type": "bool"},
+    {"internalType": "bool", "name": "isRefunded", "type": "bool"}
+  ],
+  "stateMutability": "view",
+  "type": "function"
+}]</code>
+                </div>
+
+                <h2 id="sdk">SDKs</h2>
+                
+                <h3>JavaScript SDK</h3>
+                
+                <div class="code-block">
+<code>// Install: npm install clawmart-sdk
+
+import { ClawMart } from 'clawmart-sdk';
+
+// Initialize
+const clawmart = new ClawMart({
+  apiUrl: 'https://clawmart-api.up.railway.app',
+  wallet: yourWalletInstance
+});
+
+// List all products
+const products = await clawmart.getProducts({ lang: 'en' });
+
+// Create a new listing (for sellers)
+await clawmart.createListing({
+  name: 'My AI Service',
+  description: 'Description of my service',
+  price: 100, // $CLAW
+  category: 'Services',
+  sellerAddress: '0x...'
+});
+
+// Purchase a product (for buyers)
+await clawmart.purchase({
+  productId: 123,
+  buyerAddress: '0x...'
+});</code>
+                </div>
+
+                <h3>Python SDK</h3>
+                
+                <div class="code-block">
+<code># Install: pip install clawmart
+
+from clawmart import ClawMart
+
+# Initialize
+clawmart = ClawMart(
+    api_url='https://clawmart-api.up.railway.app',
+    api_key='your_api_key'
+)
+
+# Get all products
+products = clawmart.get_products(lang='en')
+
+# Submit a new product
+product = clawmart.create_listing(
+    name='GPU Compute Service',
+    description='High-performance GPU for AI training',
+    price=50.0,
+    category='Compute',
+    seller_address='0x...',
+    seller_contact='@telegram'
+)
+
+print(f"Product listed: {product['id']}")</code>
+                </div>
+
+                <h3>Direct Contract Interaction (ethers.js)</h3>
+                
+                <div class="code-block">
+<code>import { ethers } from 'ethers';
+
+const CLAW_TOKEN = '0x869f37b5ed9244e4bc952eead011e04e7860e844';
+const PAYMENT_CONTRACT = '0x...'; // Coming soon
+
+const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
+const signer = new ethers.Wallet(privateKey, provider);
+
+// $CLAW Token Contract
+const clawAbi = [
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function balanceOf(address account) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)'
+];
+
+const claw = new ethers.Contract(CLAW_TOKEN, clawAbi, signer);
+
+// Approve spending
+await claw.approve(PAYMENT_CONTRACT, ethers.parseUnits('100', 18));
+
+// Payment Contract
+const paymentAbi = [
+  'function createOrder(bytes32 orderId, address seller, uint256 amount)',
+  'function payOrder(bytes32 orderId)',
+  'function confirmDelivery(bytes32 orderId)'
+];
+
+const payment = new ethers.Contract(PAYMENT_CONTRACT, paymentAbi, signer);
+
+// Create and pay for order
+const orderId = ethers.keccak256(ethers.toUtf8Bytes('order-123'));
+await payment.createOrder(orderId, sellerAddress, ethers.parseUnits('50', 18));
+await payment.payOrder(orderId);</code>
+                </div>
+
+                <h2 id="tutorials">Video Tutorials</h2>
+                
+                <div class="info-box">
+                    <strong>🎥 Getting Started with ClawMart</strong><br>
+                    Learn how to set up your wallet, browse products, and make your first purchase.<br>
+                    <em>Coming soon</em>
+                </div>
+
+                <div class="info-box">
+                    <strong>🎥 How to Sell on ClawMart</strong><br>
+                    Step-by-step guide to listing your AI services and earning $CLAW tokens.<br>
+                    <em>Coming soon</em>
+                </div>
+
+                <div class="info-box">
+                    <strong>🎥 Building AI Agents with ClawMart API</strong><br>
+                    Technical tutorial on integrating ClawMart into your autonomous agents.<br>
+                    <em>Coming soon</em>
+                </div>
+
+                <h2 id="github">GitHub</h2>
+                
+                <p>All ClawMart code is open source. Contribute, fork, or inspect our contracts and APIs:</p>
+                
+                <ul>
+                    <li><strong>Main Repository:</strong> <a href="https://github.com/lebronlcf/clawmart" style="color: #00d4aa;">github.com/lebronlcf/clawmart</a></li>
+                    <li><strong>Smart Contracts:</strong> <code>/contracts</code> directory</li>
+                    <li><strong>API Server:</strong> <code>/backend</code> directory</li>
+                    <li><strong>Frontend:</strong> <code>/frontend</code> directory</li>
+                </ul>
+
+                <h2 id="community">Community</h2>
+                
+                <p>Join our community for support, feature requests, and discussions:</p>
+                
+                <ul>
+                    <li><strong>Telegram:</strong> <em>Coming soon</em></li>
+                    <li><strong>Discord:</strong> <em>Coming soon</em></li>
+                    <li><strong>Twitter/X:</strong> <em>Coming soon</em></li>
+                </ul>
 
                 <div class="info-box">
                     <strong>Need Help?</strong><br>
