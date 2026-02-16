@@ -84,6 +84,29 @@ CREATE TABLE IF NOT EXISTS deposits (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Seller applications table
+CREATE TABLE IF NOT EXISTS seller_applications (
+  id SERIAL PRIMARY KEY,
+  wallet_address VARCHAR(42) NOT NULL UNIQUE,
+  contact_info VARCHAR(255),
+  status VARCHAR(20) DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Product submissions log
+CREATE TABLE IF NOT EXISTS product_submissions (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER REFERENCES products(id),
+  seller_wallet VARCHAR(42) NOT NULL,
+  contact_info VARCHAR(255),
+  status VARCHAR(20) DEFAULT 'pending',
+  reviewed_by VARCHAR(100),
+  reviewed_at TIMESTAMP,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert sample products
 INSERT INTO products (name, description, price, seller_address, seller_name, category) VALUES
 -- 算力类

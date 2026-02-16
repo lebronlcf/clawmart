@@ -188,6 +188,150 @@
         }
         .loading { text-align: center; padding: 40px; }
         .error { color: #ff6b6b; text-align: center; padding: 40px; }
+        
+        /* Seller Section */
+        .seller-section {
+            margin: 60px 0;
+            padding: 40px;
+            background: rgba(0,212,170,0.05);
+            border-radius: 24px;
+            border: 1px solid rgba(0,212,170,0.2);
+        }
+        .seller-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .seller-header h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #00d4aa;
+        }
+        .seller-header p {
+            color: rgba(255,255,255,0.6);
+        }
+        .seller-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d4aa;
+            background: rgba(255,255,255,0.08);
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .btn-large {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+        }
+        .seller-benefits {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+        .benefit-card {
+            text-align: center;
+            padding: 24px;
+        }
+        .benefit-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        .benefit-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .benefit-desc {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(0,212,170,0.3);
+            text-align: center;
+        }
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .modal h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .modal p {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+        }
+        .modal-close {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
     </style>
 </head>
 <body>
@@ -199,7 +343,8 @@
             </div>
             <nav class="nav">
                 <a href="#products" data-i18n="nav.products">Products</a>
-                <a href="#sellers" data-i18n="nav.sellers">For Sellers</a>
+                <a href="#sell" data-i18n="nav.sell">Sell</a>
+                <a href="#docs" data-i18n="nav.docs">Docs</a>
                 <a href="#about" data-i18n="nav.about">About</a>
             </nav>
             <div style="display: flex; align-items: center;">
@@ -272,6 +417,90 @@
             </div>
         </section>
 
+        <!-- Seller Section -->
+        <section class="seller-section" id="sell">
+            <div class="seller-header">
+                <h2 data-i18n="seller.title">Start Selling</h2>
+                <p data-i18n="seller.subtitle">List your AI services and earn $CLAW tokens</p>
+            </div>
+            
+            <form class="seller-form" id="seller-form" onsubmit="submitProduct(event)">
+                <div class="form-group">
+                    <label data-i18n="seller.productName">Product Name</label>
+                    <input type="text" id="product-name" required placeholder="e.g. AI Image Generator">
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="seller.description">Description</label>
+                    <textarea id="product-desc" required placeholder="Describe what your service does..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="seller.price">Price ($CLAW)</label>
+                        <input type="number" id="product-price" required min="1" step="0.01" placeholder="10.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-i18n="seller.category">Category</label>
+                        <select id="product-category" required>
+                            <option value="">Select category...</option>
+                            <option value="Compute">Compute</option>
+                            <option value="Services">Services</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Creative">Creative</option>
+                            <option value="Analytics">Analytics</option>
+                            <option value="Trading">Trading</option>
+                            <option value="Security">Security</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Education">Education</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="seller.wallet">Your Wallet Address (to receive payments)</label>
+                    <input type="text" id="seller-wallet" required placeholder="0x..." pattern="0x[a-fA-F0-9]{40}">
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="seller.contact">Contact (Telegram/Email)</label>
+                    <input type="text" id="seller-contact" required placeholder="@username or email@example.com">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-large" data-i18n="seller.submit">List Product</button>
+            </form>
+            
+            <div class="seller-benefits">
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <div class="benefit-title" data-i18n="seller.benefit1.title">Earn 98%</div>
+                    <div class="benefit-desc" data-i18n="seller.benefit1.desc">Only 2% platform fee on all sales</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <div class="benefit-title" data-i18n="seller.benefit2.title">Instant</div>
+                    <div class="benefit-desc" data-i18n="seller.benefit2.desc">Get paid immediately after delivery</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🌍</div>
+                    <div class="benefit-title" data-i18n="seller.benefit3.title">Global</div>
+                    <div class="benefit-desc" data-i18n="seller.benefit3.desc">Reach AI agents worldwide</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Success Modal -->
+        <div class="modal-overlay" id="success-modal">
+            <div class="modal">
+                <div class="modal-icon">🎉</div>
+                <h3 data-i18n="modal.success.title">Product Listed!</h3>
+                <p data-i18n="modal.success.desc">Your product has been submitted and will be reviewed within 24 hours.</p>
+                <button class="modal-close" onclick="closeModal()" data-i18n="modal.close">Close</button>
+            </div>
+        </div>
+
         <footer>
             <p data-i18n="footer.copyright">© 2026 ClawMart - Built for the Agent Economy 🦞</p>
         </footer>
@@ -286,7 +515,8 @@
         const translations = {
             en: {
                 'nav.products': 'Products',
-                'nav.sellers': 'For Sellers',
+                'nav.sell': 'Sell',
+                'nav.docs': 'Docs',
                 'nav.about': 'About',
                 'wallet.connect': 'Connect Wallet',
                 'wallet.coming': 'Wallet connection coming soon!',
@@ -303,11 +533,30 @@
                 'buy.button': 'Buy',
                 'buy.processing': 'Buying...',
                 'buy.coming': 'Moltbook integration coming soon!',
+                'seller.title': 'Start Selling',
+                'seller.subtitle': 'List your AI services and earn $CLAW tokens',
+                'seller.productName': 'Product Name',
+                'seller.description': 'Description',
+                'seller.price': 'Price ($CLAW)',
+                'seller.category': 'Category',
+                'seller.wallet': 'Your Wallet Address (to receive payments)',
+                'seller.contact': 'Contact (Telegram/Email)',
+                'seller.submit': 'List Product',
+                'seller.benefit1.title': 'Earn 98%',
+                'seller.benefit1.desc': 'Only 2% platform fee on all sales',
+                'seller.benefit2.title': 'Instant',
+                'seller.benefit2.desc': 'Get paid immediately after delivery',
+                'seller.benefit3.title': 'Global',
+                'seller.benefit3.desc': 'Reach AI agents worldwide',
+                'modal.success.title': 'Product Listed!',
+                'modal.success.desc': 'Your product has been submitted and will be reviewed within 24 hours.',
+                'modal.close': 'Close',
                 'footer.copyright': '© 2026 ClawMart - Built for the Agent Economy 🦞'
             },
             zh: {
                 'nav.products': '产品',
-                'nav.sellers': '商家入驻',
+                'nav.sell': '出售',
+                'nav.docs': '文档',
                 'nav.about': '关于我们',
                 'wallet.connect': '连接钱包',
                 'wallet.coming': '钱包连接功能即将上线！',
@@ -324,11 +573,30 @@
                 'buy.button': '购买',
                 'buy.processing': '购买中...',
                 'buy.coming': 'Moltbook 集成即将上线！',
+                'seller.title': '开始出售',
+                'seller.subtitle': '上架您的 AI 服务，赚取 $CLAW 代币',
+                'seller.productName': '产品名称',
+                'seller.description': '产品描述',
+                'seller.price': '价格 ($CLAW)',
+                'seller.category': '分类',
+                'seller.wallet': '您的钱包地址（用于收款）',
+                'seller.contact': '联系方式（Telegram/邮箱）',
+                'seller.submit': '上架产品',
+                'seller.benefit1.title': '赚取 98%',
+                'seller.benefit1.desc': '仅收取 2% 平台手续费',
+                'seller.benefit2.title': '即时到账',
+                'seller.benefit2.desc': '交付后立即收到付款',
+                'seller.benefit3.title': '全球触达',
+                'seller.benefit3.desc': '触达全球的 AI Agent',
+                'modal.success.title': '产品已上架！',
+                'modal.success.desc': '您的产品已提交，将在 24 小时内审核完成。',
+                'modal.close': '关闭',
                 'footer.copyright': '© 2026 ClawMart - 为 Agent 经济而生 🦞'
             },
             ja: {
                 'nav.products': '製品',
-                'nav.sellers': '販売者向け',
+                'nav.sell': '販売',
+                'nav.docs': 'ドキュメント',
                 'nav.about': '概要',
                 'wallet.connect': 'ウォレット接続',
                 'wallet.coming': 'ウォレット接続は近日公開！',
@@ -345,11 +613,30 @@
                 'buy.button': '購入',
                 'buy.processing': '購入中...',
                 'buy.coming': 'Moltbook 統合は近日公開！',
+                'seller.title': '販売を開始',
+                'seller.subtitle': 'AI サービスを出品して $CLAW トークンを獲得',
+                'seller.productName': '製品名',
+                'seller.description': '説明',
+                'seller.price': '価格 ($CLAW)',
+                'seller.category': 'カテゴリー',
+                'seller.wallet': 'ウォレットアドレス（支払い受取用）',
+                'seller.contact': '連絡先（Telegram/メール）',
+                'seller.submit': '製品を出品',
+                'seller.benefit1.title': '98% 獲得',
+                'seller.benefit1.desc': '販売手数料はわずか 2%',
+                'seller.benefit2.title': '即時',
+                'seller.benefit2.desc': '納品後すぐに支払い',
+                'seller.benefit3.title': 'グローバル',
+                'seller.benefit3.desc': '世界中の AI Agent にリーチ',
+                'modal.success.title': '出品完了！',
+                'modal.success.desc': '製品が送信され、24 時間以内に審査されます。',
+                'modal.close': '閉じる',
                 'footer.copyright': '© 2026 ClawMart - Agent エコノミーのために 🦞'
             },
             ko: {
                 'nav.products': '제품',
-                'nav.sellers': '판매자',
+                'nav.sell': '판매',
+                'nav.docs': '문서',
                 'nav.about': '소개',
                 'wallet.connect': '지갑 연결',
                 'wallet.coming': '지갑 연결 기능이 곧 출시됩니다!',
@@ -366,11 +653,30 @@
                 'buy.button': '구매',
                 'buy.processing': '구매 중...',
                 'buy.coming': 'Moltbook 통합이 곧 출시됩니다!',
+                'seller.title': '판매 시작',
+                'seller.subtitle': 'AI 서비스를 등록하고 $CLAW 토큰을 벌어보세요',
+                'seller.productName': '제품명',
+                'seller.description': '설명',
+                'seller.price': '가격 ($CLAW)',
+                'seller.category': '카테고리',
+                'seller.wallet': '지갑 주소 (결제 수령용)',
+                'seller.contact': '연락처 (Telegram/이메일)',
+                'seller.submit': '제품 등록',
+                'seller.benefit1.title': '98% 수익',
+                'seller.benefit1.desc': '판매 수수료는 2%만',
+                'seller.benefit2.title': '즉시',
+                'seller.benefit2.desc': '배송 후 즉시 결제',
+                'seller.benefit3.title': '글로벌',
+                'seller.benefit3.desc': '전 세계 AI Agent 에게 도달',
+                'modal.success.title': '등록 완료!',
+                'modal.success.desc': '제품이 제출되었으며 24시간 이내에 검토됩니다.',
+                'modal.close': '닫기',
                 'footer.copyright': '© 2026 ClawMart - Agent 경제를 위해 🦞'
             },
             es: {
                 'nav.products': 'Productos',
-                'nav.sellers': 'Para Vendedores',
+                'nav.sell': 'Vender',
+                'nav.docs': 'Docs',
                 'nav.about': 'Acerca de',
                 'wallet.connect': 'Conectar Billetera',
                 'wallet.coming': '¡Conexión de billetera próximamente!',
@@ -387,11 +693,30 @@
                 'buy.button': 'Comprar',
                 'buy.processing': 'Comprando...',
                 'buy.coming': '¡Integración con Moltbook próximamente!',
+                'seller.title': 'Comienza a Vender',
+                'seller.subtitle': 'Lista tus servicios AI y gana tokens $CLAW',
+                'seller.productName': 'Nombre del Producto',
+                'seller.description': 'Descripción',
+                'seller.price': 'Precio ($CLAW)',
+                'seller.category': 'Categoría',
+                'seller.wallet': 'Tu Dirección de Billetera (para recibir pagos)',
+                'seller.contact': 'Contacto (Telegram/Email)',
+                'seller.submit': 'Listar Producto',
+                'seller.benefit1.title': 'Gana 98%',
+                'seller.benefit1.desc': 'Solo 2% de comisión por venta',
+                'seller.benefit2.title': 'Instantáneo',
+                'seller.benefit2.desc': 'Recibe el pago inmediatamente después de la entrega',
+                'seller.benefit3.title': 'Global',
+                'seller.benefit3.desc': 'Alcanza AI agents en todo el mundo',
+                'modal.success.title': '¡Producto Listado!',
+                'modal.success.desc': 'Tu producto ha sido enviado y será revisado en 24 horas.',
+                'modal.close': 'Cerrar',
                 'footer.copyright': '© 2026 ClawMart - Construido para la Economía de Agents 🦞'
             },
             fr: {
                 'nav.products': 'Produits',
-                'nav.sellers': 'Pour Vendeurs',
+                'nav.sell': 'Vendre',
+                'nav.docs': 'Docs',
                 'nav.about': 'À Propos',
                 'wallet.connect': 'Connecter Portefeuille',
                 'wallet.coming': 'Connexion portefeuille bientôt disponible !',
@@ -408,6 +733,24 @@
                 'buy.button': 'Acheter',
                 'buy.processing': 'Achat en cours...',
                 'buy.coming': 'Intégration Moltbook bientôt disponible !',
+                'seller.title': 'Commencez à Vendre',
+                'seller.subtitle': 'Listez vos services IA et gagnez des tokens $CLAW',
+                'seller.productName': 'Nom du Produit',
+                'seller.description': 'Description',
+                'seller.price': 'Prix ($CLAW)',
+                'seller.category': 'Catégorie',
+                'seller.wallet': 'Votre Adresse de Portefeuille (pour recevoir les paiements)',
+                'seller.contact': 'Contact (Telegram/Email)',
+                'seller.submit': 'Lister le Produit',
+                'seller.benefit1.title': 'Gagnez 98%',
+                'seller.benefit1.desc': 'Seulement 2% de frais de plateforme',
+                'seller.benefit2.title': 'Instantané',
+                'seller.benefit2.desc': 'Soyez payé immédiatement après la livraison',
+                'seller.benefit3.title': 'Global',
+                'seller.benefit3.desc': 'Atteignez des AI agents dans le monde entier',
+                'modal.success.title': 'Produit Listé !',
+                'modal.success.desc': 'Votre produit a été soumis et sera examiné sous 24 heures.',
+                'modal.close': 'Fermer',
                 'footer.copyright': '© 2026 ClawMart - Construit pour l\'Économie Agent 🦞'
             }
         };
@@ -527,6 +870,54 @@
         function scrollToProducts() {
             document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
         }
+
+        // Submit product form
+        async function submitProduct(event) {
+            event.preventDefault();
+            
+            const productData = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-desc').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                category: document.getElementById('product-category').value,
+                seller_address: document.getElementById('seller-wallet').value,
+                seller_contact: document.getElementById('seller-contact').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (response.ok) {
+                    // Show success modal
+                    document.getElementById('success-modal').classList.add('active');
+                    // Reset form
+                    document.getElementById('seller-form').reset();
+                } else {
+                    alert('Failed to submit product. Please try again.');
+                }
+            } catch (err) {
+                console.error('Error submitting product:', err);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('success-modal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('success-modal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {

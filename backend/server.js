@@ -179,6 +179,83 @@ app.get('/api/languages', async (req, res) => {
   });
 });
 
+// Submit new product (for sellers)
+app.post('/api/products/submit', async (req, res) => {
+  const { name, description, price, category, seller_address, seller_contact } = req.body;
+  
+  // Validate required fields
+  if (!name || !description || !price || !category || !seller_address) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  // Validate wallet address format
+  if (!/^0x[a-fA-F0-9]{40}$/.test(seller_address)) {
+    return res.status(400).json({ error: 'Invalid wallet address' });
+  }
+  
+  try {
+    // Insert product with pending status (requires review)
+    const result = await pool.query(
+      `INSERT INTO products (name, description, price, currency, seller_address, seller_name, category, active, created_at) 
+       VALUES ($1, $2, $3, 'CLAW', $4, $5, $6, false, NOW()) 
+       RETURNING *`,
+      [name, description, price, seller_address, seller_contact || 'Anonymous', category]
+    );
+    
+    // TODO: Send notification to admin for review
+    // TODO: Store seller_contact in a separate table if needed
+    
+    res.status(201).json({
+      success: true,
+      message: 'Product submitted for review',
+      product: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Error submitting product:', err);
+    res.status(500).json({ error: 'Failed to submit product' });
+  }
+});
+
+// Get pending products (for admin review)
+app.get('/api/products/pending', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM products WHERE active = false ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Approve/reject product (admin only)
+app.post('/api/products/:id/review', async (req, res) => {
+  const { id } = req.params;
+  const { action } = req.body; // 'approve' or 'reject'
+  
+  // TODO: Add admin authentication
+  
+  try {
+    if (action === 'approve') {
+      await pool.query(
+        'UPDATE products SET active = true WHERE id = $1',
+        [id]
+      );
+      res.json({ success: true, message: 'Product approved' });
+    } else if (action === 'reject') {
+      await pool.query(
+        'DELETE FROM products WHERE id = $1',
+        [id]
+      );
+      res.json({ success: true, message: 'Product rejected' });
+    } else {
+      res.status(400).json({ error: 'Invalid action' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create order
 app.post('/api/orders', async (req, res) => {
   const { product_id, buyer_address, moltbook_token } = req.body;
