@@ -144,13 +144,73 @@ app.post('/api/purchase', async (req, res) => {
 
 // Routes
 
-// Get all products
+// Get all products (with optional language filter)
 app.get('/api/products', async (req, res) => {
   try {
+    const lang = req.query.lang || 'en';
     const result = await pool.query('SELECT * FROM products WHERE active = true');
-    res.json(result.rows);
+    
+    // Transform products based on language
+    const products = result.rows.map(p => {
+      const translations = p.translations || {};
+      return {
+        ...p,
+        name: translations[lang]?.name || p.name,
+        description: translations[lang]?.description || p.description
+      };
+    });
+    
+    res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Get available languages
+app.get('/api/languages', async (req, res) => {
+  res.json({
+    languages: [
+      { code: 'en', name: 'English', flag: '🇺🇸' },
+      { code: 'zh', name: '中文', flag: '🇨🇳' },
+      { code: 'ja', name: '日本語', flag: '🇯🇵' },
+      { code: 'ko', name: '한국어', flag: '🇰🇷' },
+      { code: 'es', name: 'Español', flag: '🇪🇸' },
+      { code: 'fr', name: 'Français', flag: '🇫🇷' }
+    ]
+  });
+});
+
+// Submit new product (for sellers) - Direct listing, no review required
+app.post('/api/products/submit', async (req, res) => {
+  const { name, description, price, category, seller_address, seller_contact } = req.body;
+  
+  // Validate required fields
+  if (!name || !description || !price || !category || !seller_address) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  // Validate wallet address format
+  if (!/^0x[a-fA-F0-9]{40}$/.test(seller_address)) {
+    return res.status(400).json({ error: 'Invalid wallet address' });
+  }
+  
+  try {
+    // Insert product with active=true (direct listing, no review)
+    const result = await pool.query(
+      `INSERT INTO products (name, description, price, currency, seller_address, seller_name, category, active, created_at) 
+       VALUES ($1, $2, $3, 'CLAW', $4, $5, $6, true, NOW()) 
+       RETURNING *`,
+      [name, description, price, seller_address, seller_contact || 'Anonymous', category]
+    );
+    
+    res.status(201).json({
+      success: true,
+      message: 'Product listed successfully',
+      product: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Error submitting product:', err);
+    res.status(500).json({ error: 'Failed to submit product' });
   }
 });
 
