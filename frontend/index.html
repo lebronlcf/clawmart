@@ -549,7 +549,7 @@
                 'seller.benefit3.title': 'Global',
                 'seller.benefit3.desc': 'Reach AI agents worldwide',
                 'modal.success.title': 'Product Listed!',
-                'modal.success.desc': 'Your product has been submitted and will be reviewed within 24 hours.',
+                'modal.success.desc': 'Your product is now live on ClawMart!',
                 'modal.close': 'Close',
                 'footer.copyright': '© 2026 ClawMart - Built for the Agent Economy 🦞'
             },
@@ -589,7 +589,7 @@
                 'seller.benefit3.title': '全球触达',
                 'seller.benefit3.desc': '触达全球的 AI Agent',
                 'modal.success.title': '产品已上架！',
-                'modal.success.desc': '您的产品已提交，将在 24 小时内审核完成。',
+                'modal.success.desc': '您的产品已在 ClawMart 上线！',
                 'modal.close': '关闭',
                 'footer.copyright': '© 2026 ClawMart - 为 Agent 经济而生 🦞'
             },
@@ -629,7 +629,7 @@
                 'seller.benefit3.title': 'グローバル',
                 'seller.benefit3.desc': '世界中の AI Agent にリーチ',
                 'modal.success.title': '出品完了！',
-                'modal.success.desc': '製品が送信され、24 時間以内に審査されます。',
+                'modal.success.desc': '製品が ClawMart で公開されました！',
                 'modal.close': '閉じる',
                 'footer.copyright': '© 2026 ClawMart - Agent エコノミーのために 🦞'
             },
@@ -669,7 +669,7 @@
                 'seller.benefit3.title': '글로벌',
                 'seller.benefit3.desc': '전 세계 AI Agent 에게 도달',
                 'modal.success.title': '등록 완료!',
-                'modal.success.desc': '제품이 제출되었으며 24시간 이내에 검토됩니다.',
+                'modal.success.desc': '제품이 ClawMart에 공개되었습니다!'
                 'modal.close': '닫기',
                 'footer.copyright': '© 2026 ClawMart - Agent 경제를 위해 🦞'
             },
@@ -709,7 +709,7 @@
                 'seller.benefit3.title': 'Global',
                 'seller.benefit3.desc': 'Alcanza AI agents en todo el mundo',
                 'modal.success.title': '¡Producto Listado!',
-                'modal.success.desc': 'Tu producto ha sido enviado y será revisado en 24 horas.',
+                'modal.success.desc': '¡Tu producto ya está en vivo en ClawMart!',
                 'modal.close': 'Cerrar',
                 'footer.copyright': '© 2026 ClawMart - Construido para la Economía de Agents 🦞'
             },
@@ -749,7 +749,7 @@
                 'seller.benefit3.title': 'Global',
                 'seller.benefit3.desc': 'Atteignez des AI agents dans le monde entier',
                 'modal.success.title': 'Produit Listé !',
-                'modal.success.desc': 'Votre produit a été soumis et sera examiné sous 24 heures.',
+                'modal.success.desc': 'Votre produit est maintenant en ligne sur ClawMart !',
                 'modal.close': 'Fermer',
                 'footer.copyright': '© 2026 ClawMart - Construit pour l\'Économie Agent 🦞'
             }
@@ -898,6 +898,8 @@
                     document.getElementById('success-modal').classList.add('active');
                     // Reset form
                     document.getElementById('seller-form').reset();
+                    // Reload products to show the new listing immediately
+                    loadProducts();
                 } else {
                     alert('Failed to submit product. Please try again.');
                 }

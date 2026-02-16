@@ -179,7 +179,7 @@ app.get('/api/languages', async (req, res) => {
   });
 });
 
-// Submit new product (for sellers)
+// Submit new product (for sellers) - Direct listing, no review required
 app.post('/api/products/submit', async (req, res) => {
   const { name, description, price, category, seller_address, seller_contact } = req.body;
   
@@ -194,20 +194,17 @@ app.post('/api/products/submit', async (req, res) => {
   }
   
   try {
-    // Insert product with pending status (requires review)
+    // Insert product with active=true (direct listing, no review)
     const result = await pool.query(
       `INSERT INTO products (name, description, price, currency, seller_address, seller_name, category, active, created_at) 
-       VALUES ($1, $2, $3, 'CLAW', $4, $5, $6, false, NOW()) 
+       VALUES ($1, $2, $3, 'CLAW', $4, $5, $6, true, NOW()) 
        RETURNING *`,
       [name, description, price, seller_address, seller_contact || 'Anonymous', category]
     );
     
-    // TODO: Send notification to admin for review
-    // TODO: Store seller_contact in a separate table if needed
-    
     res.status(201).json({
       success: true,
-      message: 'Product submitted for review',
+      message: 'Product listed successfully',
       product: result.rows[0]
     });
   } catch (err) {
