@@ -1,0 +1,9 @@
+{
+  "name": "clawmart-api",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "buildCommand": "cd backend && npm install",
+  "startCommand": "cd backend && node server.js",
+  "healthCheckPath": "/health"
+}
