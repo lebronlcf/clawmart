@@ -241,19 +241,52 @@ app.get('/init-db', async (req, res) => {
       );
     `);
 
-    // 插入示例商品
-    await pool.query(`
-      INSERT INTO products (name, description, price, seller_address, seller_name, category) VALUES
-      ('GPU Compute Hours', 'NVIDIA A100 GPU for AI training', 50.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Compute'),
-      ('API Credits', 'API access for data services', 10.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Services'),
-      ('Code Review Bot', 'Automated code review', 25.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Tools'),
-      ('AI Image Gen', 'AI image generation', 5.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Creative'),
-      ('Data Scraper', 'Web scraping service', 15.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Tools'),
-      ('Twitter Bot', 'Automated Twitter posting', 30.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Services'),
-      ('Smart Contract Audit', 'Security audit service', 100.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Security'),
-      ('Trading Bot', 'Automated trading strategies', 150.00, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', 'Trading')
-      ON CONFLICT DO NOTHING;
-    `);
+    // 插入示例商品 - 扩展版本
+    const products = [
+      // Compute
+      ['GPU Compute Hours', 'NVIDIA A100 GPU for AI training', 50.00, 'Compute', '⚡'],
+      ['TPU Compute', 'Google TPU v4 for ML workloads', 80.00, 'Compute', '⚡'],
+      ['CPU Cluster', 'High-performance CPU cluster', 20.00, 'Compute', '⚡'],
+      ['Cloud Storage', 'Decentralized storage on IPFS', 5.00, 'Compute', '💾'],
+      // Services
+      ['API Credits', 'API access for data services', 10.00, 'Services', '🔌'],
+      ['Twitter Bot', 'Automated Twitter posting', 30.00, 'Services', '🐦'],
+      ['Discord Manager', 'Discord community management', 25.00, 'Services', '💬'],
+      ['Telegram Bot', 'Custom Telegram bot', 35.00, 'Services', '📱'],
+      // Tools
+      ['Code Review Bot', 'Automated code review', 25.00, 'Tools', '🛠️'],
+      ['Data Scraper', 'Web scraping with proxy', 15.00, 'Tools', '🔍'],
+      ['Smart Contract Audit', 'Security audit service', 100.00, 'Security', '🛡️'],
+      ['GitHub Automation', 'CI/CD pipeline automation', 40.00, 'Tools', '⚙️'],
+      // Creative
+      ['AI Image Gen', 'AI image generation', 5.00, 'Creative', '🎨'],
+      ['Video Editing', 'AI-powered video editing', 15.00, 'Creative', '🎬'],
+      ['Music Generation', 'AI music composition', 10.00, 'Creative', '🎵'],
+      ['Copywriting', 'AI content creation', 8.00, 'Creative', '✍️'],
+      // Trading
+      ['Trading Bot', 'Automated trading strategies', 150.00, 'Trading', '📈'],
+      ['MEV Bot', 'MEV extraction strategies', 200.00, 'Trading', '⚡'],
+      ['Arbitrage Scanner', 'Cross-exchange arbitrage', 150.00, 'Trading', '🔍'],
+      ['Grid Trading Bot', 'Automated grid trading', 100.00, 'Trading', '📊'],
+      // AI
+      ['AI Model Training', 'Custom AI model training', 100.00, 'AI', '🤖'],
+      ['LLM Gateway', 'Unified language model access', 55.00, 'AI', '🧠'],
+      ['AI Agent Builder', 'No-code agent creation', 75.00, 'AI', '🔧'],
+      ['Prompt Engineering', 'Optimized prompt design', 35.00, 'AI', '💡'],
+      // Analytics
+      ['On-chain Analytics', 'Blockchain data analysis', 45.00, 'Analytics', '📊'],
+      ['Sentiment Analysis', 'Social media sentiment tracking', 25.00, 'Analytics', '📈'],
+      ['Whale Tracking', 'Large wallet movement alerts', 35.00, 'Analytics', '🐋'],
+      ['Market Predictions', 'AI price prediction models', 60.00, 'Analytics', '🔮']
+    ];
+
+    for (const [name, desc, price, category] of products) {
+      await pool.query(`
+        INSERT INTO products (name, description, price, seller_address, seller_name, category)
+        VALUES ($1, $2, $3, '0x39dB2c10171A2aAC03C5C8Ebf317DEe56E192169', 'ClawMart', $4)
+        ON CONFLICT DO NOTHING
+      `, [name, desc, price, category]);
+    }
 
     res.json({ success: true, message: 'Database initialized with 8 products' });
   } catch (err) {
