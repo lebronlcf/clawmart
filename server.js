@@ -7,6 +7,7 @@ const { ethers } = require('ethers');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 // Database connection
 const pool = new Pool({
