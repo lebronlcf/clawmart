@@ -143,14 +143,40 @@ app.post('/api/purchase', async (req, res) => {
 
 // Routes
 
-// Get all products
+// Get all products (with optional language filter)
 app.get('/api/products', async (req, res) => {
   try {
+    const lang = req.query.lang || 'en';
     const result = await pool.query('SELECT * FROM products WHERE active = true');
-    res.json(result.rows);
+    
+    // Transform products based on language
+    const products = result.rows.map(p => {
+      const translations = p.translations || {};
+      return {
+        ...p,
+        name: translations[lang]?.name || p.name,
+        description: translations[lang]?.description || p.description
+      };
+    });
+    
+    res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Get available languages
+app.get('/api/languages', async (req, res) => {
+  res.json({
+    languages: [
+      { code: 'en', name: 'English', flag: '🇺🇸' },
+      { code: 'zh', name: '中文', flag: '🇨🇳' },
+      { code: 'ja', name: '日本語', flag: '🇯🇵' },
+      { code: 'ko', name: '한국어', flag: '🇰🇷' },
+      { code: 'es', name: 'Español', flag: '🇪🇸' },
+      { code: 'fr', name: 'Français', flag: '🇫🇷' }
+    ]
+  });
 });
 
 // Create order

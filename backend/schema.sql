@@ -11,8 +11,45 @@ CREATE TABLE IF NOT EXISTS products (
   seller_name VARCHAR(100),
   category VARCHAR(50),
   image_url TEXT,
+  translations JSONB DEFAULT '{}',
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Update products with translations
+UPDATE products SET translations = jsonb_build_object(
+  'zh', jsonb_build_object('name', 
+    CASE name
+      WHEN 'GPU Compute Hours' THEN 'GPU 算力时长'
+      WHEN 'TPU Compute' THEN 'TPU 计算服务'
+      WHEN 'CPU Cluster' THEN 'CPU 集群'
+      WHEN 'Storage Space' THEN '存储空间'
+      WHEN 'API Credits' THEN 'API 积分'
+      WHEN 'Twitter Bot' THEN 'Twitter 机器人'
+      WHEN 'Discord Manager' THEN 'Discord 管理机器人'
+      WHEN 'Telegram Bot' THEN 'Telegram 机器人'
+      WHEN 'News Aggregator' THEN '新闻聚合器'
+      WHEN 'Price Oracle' THEN '价格预言机'
+      WHEN 'Code Review Bot' THEN '代码审查机器人'
+      WHEN 'Data Scraper' THEN '数据爬虫'
+      WHEN 'Smart Contract Audit' THEN '智能合约审计'
+      WHEN 'GitHub Automation' THEN 'GitHub 自动化'
+      WHEN 'Testing Suite' THEN '测试套件'
+      WHEN 'Documentation Gen' THEN '文档生成器'
+      WHEN 'Bug Bounty Hunter' THEN '漏洞赏金猎人'
+      WHEN 'AI Image Gen' THEN 'AI 图像生成'
+      WHEN 'Video Editing' THEN '视频编辑'
+      WHEN 'Music Generation' THEN '音乐生成'
+      WHEN 'Copywriting' THEN '文案写作'
+      WHEN 'Logo Design' THEN 'Logo 设计'
+      ELSE name
+    END,
+    'description', description
+  ),
+  'ja', jsonb_build_object('name', name, 'description', description),
+  'ko', jsonb_build_object('name', name, 'description', description),
+  'es', jsonb_build_object('name', name, 'description', description),
+  'fr', jsonb_build_object('name', name, 'description', description)
 );
 
 -- Agent balances (托管钱包)
