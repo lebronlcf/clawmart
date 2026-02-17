@@ -991,9 +991,55 @@
             showToast(`✅ Purchase successful! ${price} $CLAW paid for ${currentBuyProduct.name}`);
         }
         
-        // Connect Wallet - Support MetaMask, Coinbase Wallet, and other EIP-1193 wallets
+        // Connect Wallet - Support MetaMask, Coinbase, OKX, Binance, and other EIP-1193 wallets
         async function connectWallet() {
-            // Check for multiple wallet providers
+            // Check for Binance Wallet first (special case)
+            if (window.BinanceChain) {
+                try {
+                    const accounts = await window.BinanceChain.request({ method: 'eth_requestAccounts' });
+                    if (accounts.length === 0) {
+                        showToast('❌ No accounts found. Please unlock your Binance Wallet.');
+                        return;
+                    }
+                    walletConnected = true;
+                    walletAddress = accounts[0];
+                    updateWalletUI();
+                    clawBalance = Math.floor(Math.random() * 10000) + 1000;
+                    showToast(`✅ Binance Wallet connected! Balance: ${clawBalance} $CLAW`);
+                    
+                    window.BinanceChain.on('accountsChanged', handleAccountsChanged);
+                    return;
+                } catch (err) {
+                    showToast('❌ Binance Wallet connection failed: ' + err.message);
+                    return;
+                }
+            }
+            
+            // Check for OKX Wallet (special case)
+            if (window.okexchain || (window.ethereum && (window.ethereum.isOKExWallet || window.ethereum.isOkxWallet))) {
+                const okxProvider = window.okexchain || window.ethereum;
+                try {
+                    const accounts = await okxProvider.request({ method: 'eth_requestAccounts' });
+                    if (accounts.length === 0) {
+                        showToast('❌ No accounts found. Please unlock your OKX Wallet.');
+                        return;
+                    }
+                    walletConnected = true;
+                    walletAddress = accounts[0];
+                    updateWalletUI();
+                    clawBalance = Math.floor(Math.random() * 10000) + 1000;
+                    showToast(`✅ OKX Wallet connected! Balance: ${clawBalance} $CLAW`);
+                    
+                    okxProvider.on('accountsChanged', handleAccountsChanged);
+                    okxProvider.on('chainChanged', handleChainChanged);
+                    return;
+                } catch (err) {
+                    showToast('❌ OKX Wallet connection failed: ' + err.message);
+                    return;
+                }
+            }
+            
+            // Check for other EIP-1193 wallets
             const ethereum = window.ethereum || (window.web3 && window.web3.currentProvider);
             
             if (typeof ethereum !== 'undefined') {
@@ -1021,6 +1067,8 @@
                     else if (ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
                     else if (ethereum.isTrust) walletType = 'Trust Wallet';
                     else if (ethereum.isRainbow) walletType = 'Rainbow';
+                    else if (ethereum.isOKExWallet || ethereum.isOkxWallet) walletType = 'OKX Wallet';
+                    else if (ethereum.isBinance) walletType = 'Binance Wallet';
                     
                     showToast(`✅ ${walletType} connected! Balance: ${clawBalance} $CLAW`);
                     
@@ -1110,11 +1158,29 @@
                             <div style="color: var(--primary);">Install →</div>
                         </a>
                         
-                        <a href="https://trustwallet.com/" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                        <a href="https://trustwallet.com/" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; margin-bottom: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
                             <div style="font-size: 32px;">🛡️</div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600;">Trust Wallet</div>
                                 <div style="font-size: 12px; color: var(--text-muted);">Multi-chain mobile wallet</div>
+                            </div>
+                            <div style="color: var(--primary);">Install →</div>
+                        </a>
+                        
+                        <a href="https://www.okx.com/web3" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; margin-bottom: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                            <div style="font-size: 32px;">🔷</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">OKX Wallet</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Powerful Web3 wallet by OKX</div>
+                            </div>
+                            <div style="color: var(--primary);">Install →</div>
+                        </a>
+                        
+                        <a href="https://www.binance.com/en/web3wallet" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                            <div style="font-size: 32px;">🟡</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Binance Web3 Wallet</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Built into Binance ecosystem</div>
                             </div>
                             <div style="color: var(--primary);">Install →</div>
                         </a>
