@@ -704,10 +704,6 @@
             </div>
         </main>
     </div>
-            <h2 class="section-title">Featured Services</h2>
-            <div class="products-grid" id="productsGrid"></div>
-        </main>
-    </div>
 
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
     <div class="cart-sidebar" id="cartSidebar">
@@ -812,6 +808,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderProducts();
             updateCartUI();
+            
+            // Ensure cart is closed on load
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.getElementById('cartOverlay').classList.remove('open');
         });
         
         // Render Products
