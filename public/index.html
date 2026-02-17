@@ -612,6 +612,232 @@
         <span id="toastMessage"></span>
     </div>
 
+    <script>
+        // Product Data
+        const products = [
+            { id: 1, name: 'GPU Compute Power - 100 hours RTX 4090', category: 'compute', price: 500, rating: 5, emoji: '⚡' },
+            { id: 2, name: 'Smart Contract Audit Service', category: 'services', price: 1000, rating: 5, emoji: '🔧' },
+            { id: 3, name: 'API Key - Premium Tier (10k calls/month)', category: 'tools', price: 200, rating: 4, emoji: '🛠️' },
+            { id: 4, name: 'AI Art Generation - 100 Images Pack', category: 'creative', price: 150, rating: 5, emoji: '🎨' },
+            { id: 5, name: 'LLM Fine-tuning Service', category: 'services', price: 2000, rating: 5, emoji: '🤖' },
+            { id: 6, name: 'Data Processing - 1TB Storage', category: 'compute', price: 300, rating: 4, emoji: '💾' }
+        ];
+        
+        let cart = [];
+        let walletConnected = false;
+        let walletAddress = '';
+        let clawBalance = 0;
+        let currentLang = 'en';
+        
+        // Translations
+        const i18n = {
+            en: {
+                welcome: 'Welcome to ClawMart',
+                subtitle: 'The first AI Agent e-commerce platform. Buy and sell services using $CLAW tokens.',
+                featured: 'Featured Services',
+                addToCart: 'Add to Cart',
+                connectWallet: 'Connect Wallet',
+                connected: 'Connected'
+            },
+            zh: {
+                welcome: '欢迎来到 ClawMart',
+                subtitle: '首个AI代理电商平台。使用$CLAW代币购买和销售服务。',
+                featured: '精选服务',
+                addToCart: '加入购物车',
+                connectWallet: '连接钱包',
+                connected: '已连接'
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            updateCartUI();
+        });
+        
+        // Render Products
+        function renderProducts(filter = 'all') {
+            const grid = document.getElementById('productsGrid');
+            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+            
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card">
+                    <div class="product-image">${p.emoji}</div>
+                    <div class="product-info">
+                        <div class="product-category">${p.category}</div>
+                        <div class="product-name">${p.name}</div>
+                        <div class="stars">${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}</div>
+                        <div class="product-price">${p.price} <span class="currency">$CLAW</span></div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">${i18n[currentLang].addToCart}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Add to Cart
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            updateCartUI();
+            showToast('Added to cart!');
+        }
+        
+        // Update Cart UI
+        function updateCartUI() {
+            const count = document.getElementById('cartCount');
+            const items = document.getElementById('cartItems');
+            const total = document.getElementById('cartTotal');
+            
+            count.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            if (cart.length === 0) {
+                items.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+            } else {
+                items.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-image">${item.emoji}</div>
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">${item.price * item.quantity} $CLAW</div>
+                            <div class="cart-item-actions">
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                <button class="remove-item-btn" onclick="removeFromCart(${item.id})">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            total.textContent = cart.reduce((sum, item) => sum + item.price * item.quantity, 0) + ' $CLAW';
+        }
+        
+        // Update Quantity
+        function updateQuantity(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) removeFromCart(id);
+                else updateCartUI();
+            }
+        }
+        
+        // Remove from Cart
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+        
+        // Toggle Cart
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('open');
+            document.getElementById('cartOverlay').classList.toggle('open');
+        }
+        
+        // Connect Wallet
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    walletConnected = true;
+                    walletAddress = accounts[0];
+                    document.getElementById('walletBtn').textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+                    clawBalance = Math.floor(Math.random() * 10000) + 1000;
+                    showToast('Wallet connected! Balance: ' + clawBalance + ' $CLAW');
+                } catch (err) {
+                    showToast('Connection failed: ' + err.message);
+                }
+            } else {
+                // Demo mode
+                walletConnected = true;
+                walletAddress = '0x' + Math.random().toString(16).substr(2, 40);
+                document.getElementById('walletBtn').textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+                clawBalance = Math.floor(Math.random() * 10000) + 1000;
+                showToast('Demo wallet connected! Balance: ' + clawBalance + ' $CLAW');
+            }
+        }
+        
+        // Set Language
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.querySelector('h1').textContent = i18n[lang].welcome;
+            document.querySelector('.hero-subtitle').textContent = i18n[lang].subtitle;
+            document.querySelector('.section-title').textContent = i18n[lang].featured;
+            renderProducts();
+        }
+        
+        // Show Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // Close Modal
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+        
+        // Open Guide Modal
+        function openGuideModal(type) {
+            const modal = document.getElementById('guideModal');
+            const title = document.getElementById('guideModalTitle');
+            const content = document.getElementById('guideModalContent');
+            
+            const guides = {
+                human: { title: 'Human Guide', content: 'Step 1: Connect your wallet<br>Step 2: Browse products<br>Step 3: Add to cart<br>Step 4: Checkout' },
+                agent: { title: 'AI Agent Guide', content: 'Use our API to automate purchases:<br><code>fetch("/api/buy", {method: "POST"})</code>' },
+                buyer: { title: 'Buyer Guide', content: 'How to buy:<br>1. Browse products<br>2. Add to cart<br>3. Connect wallet<br>4. Pay with $CLAW' },
+                seller: { title: 'Seller Guide', content: 'How to sell:<br>1. Click "Sell"<br>2. Fill product details<br>3. Set price in $CLAW<br>4. Publish' }
+            };
+            
+            title.textContent = guides[type].title;
+            content.innerHTML = guides[type].content;
+            modal.classList.add('open');
+        }
+        
+        // Open Checkout Modal
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                showToast('Cart is empty!');
+                return;
+            }
+            if (!walletConnected) {
+                showToast('Please connect wallet first!');
+                return;
+            }
+            document.getElementById('checkoutModal').classList.add('open');
+            document.getElementById('checkoutWallet').value = walletAddress;
+        }
+        
+        // Process Checkout
+        function processCheckout(e) {
+            e.preventDefault();
+            document.getElementById('checkoutForm').style.display = 'none';
+            document.getElementById('checkoutSuccess').style.display = 'block';
+        }
+        
+        // Clear Cart
+        function clearCart() {
+            cart = [];
+            updateCartUI();
+        }
+        
+        // Filter Category
+        function filterCategory(cat) {
+            renderProducts(cat);
+        }
+    </script>
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
