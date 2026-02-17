@@ -991,27 +991,155 @@
             showToast(`✅ Purchase successful! ${price} $CLAW paid for ${currentBuyProduct.name}`);
         }
         
-        // Connect Wallet
+        // Connect Wallet - Support MetaMask, Coinbase Wallet, and other EIP-1193 wallets
         async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
+            // Check for multiple wallet providers
+            const ethereum = window.ethereum || (window.web3 && window.web3.currentProvider);
+            
+            if (typeof ethereum !== 'undefined') {
                 try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    // Request account access
+                    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    if (accounts.length === 0) {
+                        showToast('❌ No accounts found. Please unlock your wallet.');
+                        return;
+                    }
+                    
                     walletConnected = true;
                     walletAddress = accounts[0];
-                    document.getElementById('walletBtn').textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+                    
+                    // Update UI
+                    updateWalletUI();
+                    
+                    // Get balance (demo mode - in production this would query the $CLAW token contract)
                     clawBalance = Math.floor(Math.random() * 10000) + 1000;
-                    showToast('Wallet connected! Balance: ' + clawBalance + ' $CLAW');
+                    
+                    // Detect wallet type
+                    let walletType = 'Wallet';
+                    if (ethereum.isMetaMask) walletType = 'MetaMask';
+                    else if (ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                    else if (ethereum.isTrust) walletType = 'Trust Wallet';
+                    else if (ethereum.isRainbow) walletType = 'Rainbow';
+                    
+                    showToast(`✅ ${walletType} connected! Balance: ${clawBalance} $CLAW`);
+                    
+                    // Listen for account changes
+                    ethereum.on('accountsChanged', handleAccountsChanged);
+                    ethereum.on('chainChanged', handleChainChanged);
+                    
                 } catch (err) {
-                    showToast('Connection failed: ' + err.message);
+                    if (err.code === 4001) {
+                        showToast('❌ Connection rejected by user');
+                    } else {
+                        showToast('❌ Connection failed: ' + err.message);
+                    }
                 }
             } else {
-                // Demo mode
-                walletConnected = true;
-                walletAddress = '0x' + Math.random().toString(16).substr(2, 40);
-                document.getElementById('walletBtn').textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
-                clawBalance = Math.floor(Math.random() * 10000) + 1000;
-                showToast('Demo wallet connected! Balance: ' + clawBalance + ' $CLAW');
+                // No wallet detected - show installation options
+                showWalletInstallModal();
             }
+        }
+        
+        // Handle account changes
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // User disconnected
+                disconnectWallet();
+            } else {
+                // Account switched
+                walletAddress = accounts[0];
+                updateWalletUI();
+                showToast('🔄 Account switched to ' + walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4));
+            }
+        }
+        
+        // Handle chain changes
+        function handleChainChanged(chainId) {
+            showToast('🔄 Network changed. Reloading...');
+            window.location.reload();
+        }
+        
+        // Update wallet UI
+        function updateWalletUI() {
+            const btn = document.getElementById('walletBtn');
+            btn.textContent = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+            btn.classList.add('connected');
+        }
+        
+        // Disconnect wallet
+        function disconnectWallet() {
+            walletConnected = false;
+            walletAddress = '';
+            clawBalance = 0;
+            const btn = document.getElementById('walletBtn');
+            btn.textContent = 'Connect Wallet';
+            btn.classList.remove('connected');
+            showToast('👋 Wallet disconnected');
+        }
+        
+        // Show wallet installation modal
+        function showWalletInstallModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay open';
+            modal.id = 'walletInstallModal';
+            modal.innerHTML = `
+                <div class="modal" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Install a Wallet</h3>
+                        <button class="modal-close" onclick="closeModal('walletInstallModal')">×</button>
+                    </div>
+                    <div class="modal-content">
+                        <p style="margin-bottom: 20px; color: var(--text-muted);">No Ethereum wallet detected. Please install one of these popular wallets:</p>
+                        
+                        <a href="https://metamask.io/download/" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; margin-bottom: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                            <div style="font-size: 32px;">🦊</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">MetaMask</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Most popular wallet for Web3</div>
+                            </div>
+                            <div style="color: var(--primary);">Install →</div>
+                        </a>
+                        
+                        <a href="https://www.coinbase.com/wallet" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; margin-bottom: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                            <div style="font-size: 32px;">🔵</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Coinbase Wallet</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Secure wallet from Coinbase</div>
+                            </div>
+                            <div style="color: var(--primary);">Install →</div>
+                        </a>
+                        
+                        <a href="https://trustwallet.com/" target="_blank" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-nav); border-radius: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s;">
+                            <div style="font-size: 32px;">🛡️</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">Trust Wallet</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Multi-chain mobile wallet</div>
+                            </div>
+                            <div style="color: var(--primary);">Install →</div>
+                        </a>
+                        
+                        <div style="margin-top: 20px; padding: 16px; background: var(--bg-nav); border-radius: 8px; font-size: 14px;">
+                            <strong>💡 Demo Mode:</strong> You can also use the site without a wallet. Click "Continue without wallet" below to try with a demo account.
+                        </div>
+                        
+                        <button class="checkout-btn" style="margin-top: 16px; background: var(--bg-nav); color: var(--text-light);" onclick="enableDemoMode(); closeModal('walletInstallModal');">Continue without wallet</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.onclick = (e) => {
+                if (e.target === modal) closeModal('walletInstallModal');
+            };
+        }
+        
+        // Enable demo mode
+        function enableDemoMode() {
+            walletConnected = true;
+            walletAddress = '0x' + Math.random().toString(16).substr(2, 40);
+            clawBalance = Math.floor(Math.random() * 10000) + 1000;
+            updateWalletUI();
+            showToast('🎮 Demo mode enabled! Balance: ' + clawBalance + ' $CLAW');
         }
         
         // Set Language
@@ -1035,7 +1163,14 @@
         
         // Close Modal
         function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('open');
+                // Remove from DOM if it's a dynamically created modal
+                if (id === 'walletInstallModal') {
+                    setTimeout(() => modal.remove(), 300);
+                }
+            }
         }
         
         // Open Guide Modal
