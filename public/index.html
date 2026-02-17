@@ -1126,6 +1126,25 @@ fetch('/api/purchase', {
                 showToast('Please connect wallet first!');
                 return;
             }
+            
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            
+            // Update checkout display
+            document.getElementById('checkoutTotal').textContent = total + ' $CLAW';
+            
+            // Build checkout items list
+            const checkoutItemsDiv = document.getElementById('checkoutItems');
+            checkoutItemsDiv.innerHTML = cart.map(item => `
+                <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <div style="font-weight: 500;">${item.name}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Qty: ${item.quantity}</div>
+                    </div>
+                    <div style="font-weight: 600; color: var(--primary);">${item.price * item.quantity} $CLAW</div>
+                </div>
+            `).join('');
+            
             document.getElementById('checkoutModal').classList.add('open');
             document.getElementById('checkoutWallet').value = walletAddress;
         }
@@ -1133,8 +1152,30 @@ fetch('/api/purchase', {
         // Process Checkout
         function processCheckout(e) {
             e.preventDefault();
+            
+            const email = document.getElementById('checkoutEmail').value;
+            if (!email) {
+                showToast('Please enter your email');
+                return;
+            }
+            
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            
+            // Check balance
+            if (total > clawBalance) {
+                showToast('Insufficient $CLAW balance!');
+                return;
+            }
+            
+            // Deduct from balance
+            clawBalance -= total;
+            
+            // Show success
             document.getElementById('checkoutForm').style.display = 'none';
             document.getElementById('checkoutSuccess').style.display = 'block';
+            
+            showToast(`Payment successful! ${total} $CLAW deducted. Remaining: ${clawBalance} $CLAW`);
         }
         
         // Clear Cart
